@@ -1,0 +1,44 @@
+.start-btn {
+  padding: 16px 50px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  background: #9BBEB3;
+  color: white;
+}
+
+.start-btn:hover:not(:disabled) {
+  background: #8BB2A6;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.start-btn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .start-btn {
+    padding: 14px 35px;
+    font-size: 22px;
+    min-width: 140px;
+    backdrop-filter: blur(5px);
+  }
+}
+
+@media (max-width: 480px) {
+  .start-btn {
+    padding: 12px 30px;
+    font-size: 20px;
+    min-width: 120px;
+  }
+}
