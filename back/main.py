@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from auth.routers import router as auth_router
+from statistics.routers import router as statistics_router
 
 app = FastAPI(title="Pomodoro Timer API")
 
@@ -15,6 +16,8 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/api", tags=["Authentication"])
+app.include_router(statistics_router, prefix="/api", tags=["Statistics"])
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
