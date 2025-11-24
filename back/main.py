@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from auth.routers import router as auth_router
 from statistics.routers import router as statistics_router
+from timer.routers import router as timer_router
 
 app = FastAPI(title="Pomodoro Timer API")
 
@@ -17,6 +18,7 @@ app.add_middleware(
 
 app.include_router(auth_router, prefix="/api", tags=["Authentication"])
 app.include_router(statistics_router, prefix="/api", tags=["Statistics"])
+app.include_router(timer_router, prefix="/api", tags=["Timer"])
 
 
 if __name__ == "__main__":
