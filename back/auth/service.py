@@ -63,4 +63,69 @@ class AuthService:
             "requires_code_verification": True
         }
 
-   
+    async def verify_code_and_register(self, email: str, code: str, name: str) -> dict:
+        """Подтверждение кода и завершение регистрации"""
+        email = email.lower().strip()
+        code = code.strip()
+        name = name.strip()
+
+        # Валидация на стороне сервера
+        if not self._validate_email(email):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Неверный формат email"
+            )
+
+        if len(code) != 6 or not code.isdigit():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Код должен содержать ровно 6 цифр"
+            )
+
+        if len(name) < 2:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Имя должно содержать минимум 2 символа"
+            )
+
+        # Проверяем код
+        code_service = CodeService(self.db)
+        is_valid = await code_service.verify_code(email, code)
+        
+        if not is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Неверный или просроченный код"
+            )
+
+        # Проверяем, не зарегистрирован ли уже пользователь
+        stmt = select(User).where(User.email == email)
+        result = await self.db.execute(stmt)
+        existing_user = result.scalar_one_or_none()
+        
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Пользователь с таким email уже существует"
+            )
+
+        # Создаем пользователя
+        user = User(email=email, name=name)
+        self.db.add(user)
+        await self.db.commit()
+        await self.db.refresh(user)
+        
+        # Создаем токен доступа
+        access_token = create_access_token(
+            data={"user_id": user.user_id, "email": user.email}
+        )
+        
+        return {
+            "success": True,
+            "message": "Регистрация успешно завершена",
+            "user_id": user.user_id,
+            "name": user.name,
+            "email": user.email,
+            "access_token": access_token,
+            "token_type": "bearer"
+        }

@@ -62,3 +62,17 @@ async def register_user(
     auth_service = AuthService(db)
     result = await auth_service.register_user(request.email, request.name)
     return AuthResponse(**result)
+
+@router.post("/auth/verify-code", response_model=AuthResponse)
+async def verify_code(
+    request: VerifyCodeRequest,
+    db: AsyncSession = Depends(get_session)
+):
+    """Подтверждение кода и завершение регистрации"""
+    auth_service = AuthService(db)
+    result = await auth_service.verify_code_and_register(
+        request.email, 
+        request.code, 
+        request.name
+    )
+    return AuthResponse(**result)
