@@ -85,7 +85,74 @@ class TimerService:
             else:
                 return "short_break"
 
-    
+    async def start_timer(self, user_id: int, timer_type: str = None) -> dict:
+        """Запуск нового таймера"""
+        current_timer = await self.get_current_timer(user_id)
+        if current_timer:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="У вас уже есть активный таймер"
+            )
+        
+        if not timer_type:
+            timer_type = await self._get_next_timer_type(user_id)
+        
+        user_settings = await self._get_user_settings(user_id)
+        
+        timer = Timer(
+            user_id=user_id,
+            type=timer_type,
+            work_time=25,
+        )
+        
+        # Устанавливаем время перерыва в зависимости от типа
+        if timer_type == "short_break":
+            timer.break_time = user_settings["short_break_duration"]
+        elif timer_type == "long_break":
+            timer.break_time = user_settings["long_break_duration"]
+        
+        self.db.add(timer)
+        await self.db.commit()
+        await self.db.refresh(timer)
+        
+        return {
+            "timer_id": timer.timer_id,
+            "type": timer.type,
+            "startTime": timer.created_at.isoformat(),
+            "duration": timer.work_time * 60 if timer_type == "work" else timer.break_time * 60,
+            "message": f"Таймер {'работы' if timer_type == 'work' else 'перерыва'} успешно запущен"
+        }
+
+    async def stop_timer(self, user_id: int) -> dict:
+        """Остановка активного таймера"""
+        stmt = select(Timer).where(
+            and_(
+                Timer.user_id == user_id,
+                Timer.is_completed == False,
+                Timer.is_interrupted == False
+            )
+        )
+        
+        result = await self.db.execute(stmt)
+        timer = result.scalar_one_or_none()
+        
+        if not timer:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Активный таймер не найден"
+            )
+        
+        # Помечаем таймер как прерванный
+        timer.is_interrupted = True
+        
+        await self.db.commit()
+        
+        return {
+            "message": "Таймер успешно остановлен",
+            "timer_id": timer.timer_id,
+            "interrupted_at": datetime.now().isoformat()
+        }
+
     async def complete_timer(self, user_id: int) -> dict:
         """Завершение таймера (естественное завершение)"""
         stmt = select(Timer).where(
