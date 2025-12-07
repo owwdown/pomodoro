@@ -131,12 +131,32 @@
 
 .profile-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 15px;
 }
 
+.delete-btn {
+  padding: 12px 18px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  flex: 1;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+}
+
 .save-btn {
-  padding: 12px 24px;
+  padding: 12px 18px;
   background: transparent;
   color: white;
   border: 1px solid white;
@@ -145,6 +165,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex: 1;
 }
 
 .save-btn:hover:not(:disabled) {
@@ -152,10 +173,12 @@
   transform: translateY(-2px);
 }
 
+.delete-btn:disabled,
 .save-btn:disabled {
   background: #cccccc;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
   border-color: #cccccc;
 }
 
