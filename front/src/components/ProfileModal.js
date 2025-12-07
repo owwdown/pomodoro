@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../services/api';
 import './ProfileModal.css';
 
 const ProfileModal = ({ onClose }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,6 +19,20 @@ const ProfileModal = ({ onClose }) => {
       onClose();
     } catch (error) {
       console.error('Ошибка при обновлении профиля:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsLoading(true);
+    try {
+      // Здесь будет запрос на удаление аккаунта
+      await authAPI.deleteAccount();
+      logout();
+      onClose();
+    } catch (error) {
+      console.error('Ошибка при удалении аккаунта:', error);
     } finally {
       setIsLoading(false);
     }
@@ -59,6 +74,14 @@ const ProfileModal = ({ onClose }) => {
           </div>
 
           <div className="profile-actions">
+            <button 
+              className="delete-btn"
+              onClick={handleDeleteAccount}
+              disabled={isLoading}
+            >
+              Удалить аккаунт
+            </button>
+            
             <button 
               className="save-btn"
               onClick={handleSave}
