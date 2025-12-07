@@ -21,14 +21,12 @@ class AuthService:
         email = email.lower().strip()
         name = name.strip()
 
-        # Валидация email
         if not self._validate_email(email):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Неверный формат email"
             )
 
-        # Проверка имени
         if len(name) < 2:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -41,7 +39,6 @@ class AuthService:
                 detail="Имя не должно превышать 50 символов"
             )
 
-        # Проверка, что пользователь с таким email еще не зарегистрирован
         stmt = select(User).where(User.email == email)
         result = await self.db.execute(stmt)
         existing_user = result.scalar_one_or_none()
@@ -52,7 +49,6 @@ class AuthService:
                 detail="Пользователь с таким email уже существует"
             )
 
-        # Отправляем код подтверждения
         code_service = CodeService(self.db)
         result = await code_service.send_code_for_registration(email)
         
@@ -69,7 +65,6 @@ class AuthService:
         code = code.strip()
         name = name.strip()
 
-        # Валидация на стороне сервера
         if not self._validate_email(email):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -88,7 +83,6 @@ class AuthService:
                 detail="Имя должно содержать минимум 2 символа"
             )
 
-        # Проверяем код
         code_service = CodeService(self.db)
         is_valid = await code_service.verify_code(email, code)
         
@@ -98,7 +92,6 @@ class AuthService:
                 detail="Неверный или просроченный код"
             )
 
-        # Проверяем, не зарегистрирован ли уже пользователь
         stmt = select(User).where(User.email == email)
         result = await self.db.execute(stmt)
         existing_user = result.scalar_one_or_none()
@@ -109,13 +102,11 @@ class AuthService:
                 detail="Пользователь с таким email уже существует"
             )
 
-        # Создаем пользователя
         user = User(email=email, name=name)
         self.db.add(user)
         await self.db.commit()
         await self.db.refresh(user)
         
-        # Создаем токен доступа
         access_token = create_access_token(
             data={"user_id": user.user_id, "email": user.email}
         )
@@ -129,3 +120,83 @@ class AuthService:
             "access_token": access_token,
             "token_type": "bearer"
         }
+    
+class LoginService:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    def _validate_email(self, email: str) -> bool:
+        """Валидация email с помощью регулярного выражения"""
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return re.match(pattern, email) is not None
+
+    async def login_user(self, email: str) -> dict:
+        """отправка кода подтверждения"""
+        email = email.lower().strip()
+
+        if not self._validate_email(email):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Неверный формат email"
+            )
+        
+        code_service = CodeService(self.db)
+        result = await code_service.send_code_for_registration(email)
+        
+        return {
+            "success": True,
+            "message": result["message"],
+            "email": email,
+            "requires_code_verification": True
+        }
+
+    async def verify_code_and_login(self, email: str, code: str) -> dict:
+        """Подтверждение кода и вход в систему"""
+        email = email.lower().strip()
+        code = code.strip()
+
+        if not self._validate_email(email):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Неверный формат email"
+            )
+
+        if len(code) != 6 or not code.isdigit():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Код должен содержать ровно 6 цифр"
+            )
+
+        code_service = CodeService(self.db)
+        is_valid = await code_service.verify_code(email, code)
+        
+        if not is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Неверный или просроченный код"
+            )
+
+        stmt = select(User).where(User.email == email)
+        result = await self.db.execute(stmt)
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Пользователь не найден"
+            )
+
+        access_token = create_access_token(
+            data={"user_id": user.user_id, "email": user.email}
+        )
+        
+        return {
+            "success": True,
+            "message": "Вход выполнен успешно",
+            "user_id": user.user_id,
+            "name": user.name,
+            "email": user.email,
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+   

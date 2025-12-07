@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import get_session
-from auth.service import AuthService
+from auth.service import AuthService, LoginService
 
 router = APIRouter()
 
@@ -19,6 +19,9 @@ class RegisterRequest(BaseModel):
         if len(v.strip()) > 50:
             raise ValueError('Имя не должно превышать 50 символов')
         return v.strip()
+    
+class LoginRequest((BaseModel)):
+    email: EmailStr
 
 class VerifyCodeRequest(BaseModel):
     email: EmailStr
@@ -42,6 +45,19 @@ class VerifyCodeRequest(BaseModel):
         if len(v.strip()) > 50:
             raise ValueError('Имя не должно превышать 50 символов')
         return v.strip()
+    
+class VerifyLoginCodeRequest(BaseModel):
+    email: EmailStr
+    code: str
+    
+    @field_validator('code')
+    @classmethod
+    def validate_code(cls, v):
+        if not v or len(v.strip()) != 6:
+            raise ValueError('Код должен содержать 6 цифр')
+        if not v.isdigit():
+            raise ValueError('Код должен содержать только цифры')
+        return v.strip()
 
 class AuthResponse(BaseModel):
     success: bool
@@ -63,6 +79,15 @@ async def register_user(
     result = await auth_service.register_user(request.email, request.name)
     return AuthResponse(**result)
 
+@router.post("/auth/login",  response_model=AuthResponse)
+async def login_user(
+    request: LoginRequest,
+    db: AsyncSession = Depends(get_session)
+):
+    login_service = LoginService(db)
+    result = await login_service.login_user(request.email)
+    return AuthResponse(**result)
+
 @router.post("/auth/verify-code", response_model=AuthResponse)
 async def verify_code(
     request: VerifyCodeRequest,
@@ -75,4 +100,14 @@ async def verify_code(
         request.code, 
         request.name
     )
+    return AuthResponse(**result)
+
+@router.post("/auth/verify-login-code", response_model=AuthResponse)
+async def verify_login_code(
+    request: VerifyLoginCodeRequest,
+    db: AsyncSession = Depends(get_session)
+):
+    """Подтверждение кода и вход в систему"""
+    login_service = LoginService(db)
+    result = await login_service.verify_code_and_login(request.email, request.code)
     return AuthResponse(**result)
