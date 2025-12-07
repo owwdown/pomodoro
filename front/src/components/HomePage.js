@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import TimerWidget from './TimerWidget';
 import StatisticsModal from './StatisticsModal';
+import ProfileModal from './ProfileModal';
+import SettingsModal from './SettingsModal';
 import './HomePage.css';
-
 import logo from '../assets/images/logo.png';
 
 const HomePage = () => {
   const [showStatistics, setShowStatistics] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const { user, logout } = useAuth();
 
   return (
@@ -17,14 +20,22 @@ const HomePage = () => {
       </div>
 
       <nav className="top-nav">
-        <button className="nav-btn">Настройки</button>
+        <button 
+          className="nav-btn"
+          onClick={() => setShowSettings(true)}
+        >
+          Настройки
+        </button>
         <button 
           className="nav-btn"
           onClick={() => setShowStatistics(true)}
         >
           Статистика
         </button>
-        <button className="nav-btn">
+        <button 
+          className="nav-btn"
+          onClick={() => setShowProfile(true)}
+        >
           Профиль
         </button>
       </nav>
@@ -35,6 +46,14 @@ const HomePage = () => {
 
       {showStatistics && (
         <StatisticsModal onClose={() => setShowStatistics(false)} />
+      )}
+      
+      {showProfile && (
+        <ProfileModal onClose={() => setShowProfile(false)} />
+      )}
+      
+      {showSettings && (
+        <SettingsModal onClose={() => setShowSettings(false)} />
       )}
     </div>
   );
