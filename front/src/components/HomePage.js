@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import TimerWidget from './TimerWidget';
 import StatisticsModal from './StatisticsModal';
 import ProfileModal from './ProfileModal';
@@ -11,9 +12,26 @@ const HomePage = () => {
   const [showStatistics, setShowStatistics] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [currentTimer, setCurrentTimer] = useState(null);
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-  return (
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  if (!user) {
+    return null;
+  }
+
+ return (
     <div className="home-page">
       <div className="logo">
         <img src={logo} alt="Pomodoro Timer" className="logo-image" />
@@ -58,5 +76,4 @@ const HomePage = () => {
     </div>
   );
 };
-
 export default HomePage;

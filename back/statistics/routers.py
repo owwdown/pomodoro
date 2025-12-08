@@ -5,7 +5,7 @@ from typing import Optional
 
 from db import get_session
 from auth.dependencies import get_current_user
-from statistics.service import StatisticsService
+from .service import StatisticsService
 
 router = APIRouter()
 
@@ -18,7 +18,6 @@ async def get_statistics(
 ):
     """Получение статистики пользователя"""
     try:
-        # Преобразуем строки в datetime
         from_date = None
         to_date = None
         
@@ -47,4 +46,25 @@ async def get_statistics(
         raise HTTPException(
             status_code=500,
             detail=f"Ошибка при получении статистики: {str(e)}"
+        )
+    
+@router.get("/statistics/summary")
+async def get_statistics_summary(
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session)
+):
+    """Получение сводной статистики пользователя"""
+    try:
+        statistics_service = StatisticsService(db)
+        summary = await statistics_service.get_statistics_summary(current_user["user_id"])
+        
+        return {
+            "success": True,
+            "summary": summary
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка при получении сводной статистики: {str(e)}"
         )

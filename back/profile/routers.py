@@ -50,3 +50,17 @@ async def update_profile(
         name=request.name
     )
     return result
+
+@router.delete("/profile")
+async def delete_account(
+    request: DeleteAccountRequest,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session)
+):
+    """Удаление аккаунта пользователя"""
+    profile_service = ProfileService(db)
+    result = await profile_service.delete_user_account(
+        user_id=current_user["user_id"],
+        confirm=request.confirm
+    )
+    return result
