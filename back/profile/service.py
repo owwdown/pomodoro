@@ -47,7 +47,7 @@ class ProfileService:
                 "break_time": last_timer.break_time if last_timer else 5,
                 "short_break_duration": 5,
                 "long_break_duration": 15,
-                "pomodoros_before_long_break": 4 
+                "pomodoros_before_long_break": 4
             }
         }
 
@@ -92,4 +92,30 @@ class ProfileService:
             "success": True,
             "message": "Профиль успешно обновлен",
             "updates": updates
+        }
+
+    async def delete_user_account(self, user_id: int, confirm: bool = True) -> dict:
+        """Удаление аккаунта пользователя"""
+        if not confirm:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Требуется подтверждение удаления"
+            )
+        
+        stmt = select(User).where(User.user_id == user_id)
+        result = await self.db.execute(stmt)
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Пользователь не найден"
+            )
+        
+        await self.db.delete(user)
+        await self.db.commit()
+        
+        return {
+            "success": True,
+            "message": "Аккаунт успешно удален"
         }

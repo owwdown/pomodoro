@@ -1,16 +1,3 @@
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
 .profile-modal {
   background: #97B1A9;
   border-radius: 20px;
@@ -182,6 +169,76 @@
   border-color: #cccccc;
 }
 
+.delete-confirm-modal {
+  background: #97B1A9;
+  border-radius: 20px;
+  padding: 25px;
+  width: 90%;
+  max-width: 350px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.delete-confirm-content h3 {
+  color: white;
+  font-size: 18px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.confirm-delete-btn {
+  padding: 10px 16px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  flex: 1;
+}
+
+.confirm-delete-btn:hover:not(:disabled) {
+  background: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+}
+
+.cancel-delete-btn {
+  padding: 10px 16px;
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.cancel-delete-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.confirm-delete-btn:disabled,
+.cancel-delete-btn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  border-color: #cccccc;
+}
+
 @media (max-width: 480px) {
   .profile-modal {
     padding: 20px;
@@ -200,5 +257,16 @@
   
   .modal-header h2 {
     font-size: 20px;
+  }
+  
+  .delete-confirm-modal {
+    padding: 20px;
+    margin: 20px;
+    max-width: 300px;
+  }
+  
+  .profile-actions,
+  .delete-confirm-actions {
+    flex-direction: column;
   }
 }

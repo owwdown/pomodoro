@@ -11,9 +11,7 @@ class User(Base):
     name = Column(Text, nullable=False)
     sub_status = Column(Boolean, default=False)
     pomodoro_count = Column(Integer, default=0)
-    short_break_duration = Column(Integer, default=5)
-    long_break_duration = Column(Integer, default=15)
-    pomodoros_before_long_break = Column(Integer, default=4)
+    
 
 class Timer(Base):
     __tablename__ = "timer"
