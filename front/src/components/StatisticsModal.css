@@ -16,7 +16,7 @@
   border-radius: 20px;
   padding: 30px;
   width: 90%;
-  max-width: 500px;
+  max-width: 1080px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   position: relative;
 }
@@ -121,43 +121,44 @@
 
 .scale-line {
   position: absolute;
-  left: 25px;
+  left: 35px;
   top: 0;
-  bottom: 20px;
+  bottom: 24px;
   width: 1px;
   background: white;
 }
 
-.scale-label-120 {
+.scale-label-top {
   position: absolute;
   left: 0;
   top: 0;
   color: white;
   font-size: 12px;
-  width: 20px;
+  width: 30px;
   text-align: right;
 }
 
-.scale-label-60 {
+.scale-label-mid {
   position: absolute;
   left: 0;
   top: 50%;
+  transform: translateY(-50%);
   color: white;
   font-size: 12px;
-  width: 20px;
+  width: 30px;
   text-align: right;
-  transform: translateY(-50%);
 }
 
-.scale-label-0 {
+.scale-label-bottom {
   position: absolute;
   left: 0;
-  bottom: 20px;
+  bottom: 23px;
   color: white;
   font-size: 12px;
-  width: 20px;
+  width: 30px;
   text-align: right;
 }
+
 
 .chart {
   display: flex;
@@ -165,7 +166,7 @@
   align-items: flex-end;
   flex: 1;
   height: 100%;
-  padding-bottom: 20px;
+  padding-bottom: 0px;
   position: relative;
 }
 
@@ -191,9 +192,17 @@
 .chart-bar {
   width: 25px;
   background: white;
-  border-radius: 4px 4px 0 0;
-  min-height: 5px;
+  border-radius: 2px 2px 0 0;
+  min-height: 3px;
   transition: all 0.3s ease;
+}
+
+.chart-bar-label {
+  margin-top: 5px;
+  font-size: 13px;
+  color: white;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .chart-bar:hover {

@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
-import './Register.css';
+import './AuthForms.css';
+
 import logo from '../assets/images/logo.png';
 
 const Register = () => {
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     email: '',
-    name: ''
+    name: '',
+    code: ''
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const validateForm = () => {
     const newErrors = {};
@@ -32,6 +37,15 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const validateCode = () => {
+    if (!formData.code) {
+      setErrors({ code: 'Код обязателен' });
+      return false;
+    }
+    setErrors({});
+    return true;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -46,7 +60,7 @@ const Register = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) return;
@@ -56,20 +70,56 @@ const Register = () => {
       const response = await authAPI.register(formData);
       
       if (response.data.success) {
-        navigate('/register-confirm', { 
-          state: { 
-            email: formData.email
-          }
-        });
+        setStep(2);
+        setErrors({});
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
         setErrors({ 
-          email: 'Пользователь с таким email уже существует' 
+          email: error.response.data.detail || 'Пользователь с таким email уже существует' 
         });
       } else {
         setErrors({ 
-          submit: 'Произошла ошибка при регистрации. Попробуйте еще раз.' 
+          submit: error.response?.data?.detail || 'Произошла ошибка при регистрации. Попробуйте еще раз.' 
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCodeSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateCode()) return;
+
+    setIsLoading(true);
+    try {
+      const response = await authAPI.verifyRegistration({
+        email: formData.email,
+        code: formData.code,
+        name: formData.name
+      });
+      
+      if (response.data.access_token) {
+        const user = {
+          id: response.data.user_id,
+          email: response.data.email,
+          name: response.data.name
+        };
+        
+        login(response.data.access_token, user);
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Ошибка при подтверждении регистрации:', error);
+      if (error.response && error.response.status === 400) {
+        setErrors({ 
+          code: error.response.data.detail || 'Неверный код подтверждения' 
+        });
+      } else {
+        setErrors({ 
+          submit: error.response?.data?.detail || 'Произошла ошибка при подтверждении кода. Попробуйте еще раз.' 
         });
       }
     } finally {
@@ -82,61 +132,93 @@ const Register = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-logo">
-        <img src={logo} alt="Pomodoro Timer" className="auth-logo-image" />
+      <div className="auth-container">
+        {/* Логотип */}
+        <div className="auth-logo">
+          <img src={logo} alt="Pomodoro Timer" className="auth-logo-image" />
+        </div>
+  
+        {/* Заголовок над формой */}
+        <h1 className="auth-title">
+          {step === 1 ? 'Создание аккаунта' : 'Подтверждение аккаунта'}
+        </h1>
+  
+        <div className="auth-form">
+          {step === 1 ? (
+            <form onSubmit={handleRegisterSubmit}>
+              <div className="form-group">
+                <label htmlFor="name">Введите ваше имя</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={errors.name ? 'error' : ''}
+                />
+                {errors.name && <span className="error-text">{errors.name}</span>}
+              </div>
+  
+              <div className="form-group">
+                <label htmlFor="email">Введите ваш Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={errors.email ? 'error' : ''}
+                />
+                {errors.email && <span className="error-text">{errors.email}</span>}
+              </div>
+  
+              {errors.submit && <div className="error-text submit-error">{errors.submit}</div>}
+  
+              <button 
+                type="submit" 
+                className="submit-btn narrow-btn"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Отправка...' : 'Получить код'}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleCodeSubmit}>
+              <div className="form-group">
+                <label htmlFor="code">Введите код</label>
+                <input
+                  type="text"
+                  id="code"
+                  name="code"
+                  value={formData.code}
+                  onChange={handleChange}
+                  className={errors.code ? 'error' : ''}
+                />
+                {errors.code && <span className="error-text">{errors.code}</span>}
+              </div>
+  
+              {errors.submit && <div className="error-text submit-error">{errors.submit}</div>}
+  
+              <button 
+                type="submit" 
+                className="submit-btn narrow-btn"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Отправка...' : 'Отправить код'}
+              </button>
+            </form>
+          )}
+        </div>
+  
+        {/* Кнопка "Нет аккаунта" */}
+        <button 
+          className="register-btn"
+          onClick={handleLoginClick}
+        >
+          Аккаунт есть
+        </button>
       </div>
-
-      <h1 className="auth-title">Создание аккаунта</h1>
-
-      <div className="auth-form">
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Введите ваше имя</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className={errors.name ? 'error' : ''}
-            />
-            {errors.name && <span className="error-text">{errors.name}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="email">Введите ваш Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={errors.email ? 'error' : ''}
-            />
-            {errors.email && <span className="error-text">{errors.email}</span>}
-          </div>
-
-          {errors.submit && <div className="error-text submit-error">{errors.submit}</div>}
-
-          <button 
-            type="submit" 
-            className="submit-btn narrow-btn"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
-          </button>
-        </form>
-      </div>
-
-      <button 
-        className="register-btn"
-        onClick={handleLoginClick}
-      >
-        Нет аккаунта
-      </button>
-    </div>
-  );
-};
-
-export default Register;
+    );
+  };
+  
+  export default Register;

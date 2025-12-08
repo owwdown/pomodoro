@@ -1,0 +1,235 @@
+.settings-modal {
+  background: #97B1A9;
+  border-radius: 20px;
+  padding: 35px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.modal-header h2 {
+  color: white;
+  font-size: 28px; /* Увеличили с 24px */
+  margin: 0;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 34px; /* Увеличили с 30px */
+  color: white;
+  cursor: pointer;
+  width: 44px; /* Увеличили с 40px */
+  height: 44px; /* Увеличили с 40px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.setting-label {
+  color: white;
+  font-size: 18px; /* Увеличили с 16px */
+  font-weight: 600;
+}
+
+.time-input {
+  padding: 16px; /* Увеличили с 14px */
+  border: 2px solid white;
+  border-radius: 10px;
+  font-size: 18px; /* Увеличили с 16px */
+  background: transparent;
+  color: white;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.time-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.time-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px; /* Увеличили для placeholder */
+}
+
+.time-input::-webkit-outer-spin-button,
+.time-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.time-input[type=number] {
+  -moz-appearance: textfield;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.checkbox-group {
+  margin: 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  font-size: 18px; /* Увеличили с 16px */
+  font-weight: 600;
+  cursor: pointer;
+  padding: 1px 0;
+}
+
+.checkbox-input {
+  display: none;
+}
+
+.custom-checkbox {
+  width: 24px; /* Увеличили с 22px */
+  height: 24px; /* Увеличили с 22px */
+  border: 2px solid white;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 15px;
+  
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.custom-checkbox::after {
+  content: '✓';
+  color: white;
+  font-size: 16px; /* Увеличили с 14px */
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.checkbox-input:checked + .custom-checkbox {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.checkbox-input:checked + .custom-checkbox::after {
+  opacity: 1;
+}
+
+.checkbox-label:hover .custom-checkbox {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.cancel-btn {
+  padding: 16px 24px; /* Увеличили padding */
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px; /* Увеличили с 16px */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  flex: 1;
+}
+
+.cancel-btn:hover {
+  background: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+}
+
+.apply-btn {
+  padding: 16px 24px; /* Увеличили padding */
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  border-radius: 10px;
+  font-size: 18px; /* Увеличили с 16px */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.apply-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 480px) {
+  .settings-modal {
+    padding: 25px;
+    margin: 20px;
+  }
+  
+  .modal-header h2 {
+    font-size: 24px; /* Увеличили для мобильных */
+  }
+  
+  .settings-actions {
+    flex-direction: column;
+  }
+  
+  .checkbox-label {
+    font-size: 17px; /* Увеличили для мобильных */
+  }
+  
+  .setting-label {
+    font-size: 17px; /* Увеличили для мобильных */
+  }
+  
+  .time-input {
+    font-size: 17px; /* Увеличили для мобильных */
+    padding: 14px;
+  }
+  
+  .cancel-btn,
+  .apply-btn {
+    font-size: 17px; /* Увеличили для мобильных */
+    padding: 14px 20px;
+  }
+}
